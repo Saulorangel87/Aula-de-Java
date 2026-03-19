@@ -3,10 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BioFit Pro - Avaliação Oficial</title>
+    <title>BioFit Pro - v3.0</title>
     
-    <!-- Bibliotecas Externas -->
-    <script src="https://cdn.jsdelivr.net"></script>
+    <!-- Bibliotecas com links redundantes para garantir carregamento -->
+    <script src="https://cdnjs.cloudflare.com"></script>
     <script src="https://cdnjs.cloudflare.com"></script>
 
     <style>
@@ -27,13 +27,9 @@
         label { display: block; font-size: 0.7rem; font-weight: bold; color: #475569; margin-bottom: 3px; text-transform: uppercase; }
         input, select { width: 100%; padding: 10px; border: 2px solid #e2e8f0; border-radius: 8px; box-sizing: border-box; font-size: 1rem; }
         .tip { font-size: 0.65rem; color: #64748b; margin-top: -5px; margin-bottom: 10px; display: block; }
-        
         button { width: 100%; background: linear-gradient(135deg, var(--primary), var(--accent)); color: white; padding: 14px; border: none; border-radius: 10px; font-weight: bold; cursor: pointer; text-transform: uppercase; margin-top: 10px; }
-        
         #resultado { margin-top: 1.5rem; display: none; text-align: center; border-top: 2px solid #f1f5f9; padding-top: 1rem; }
         .chart-box { position: relative; height: 180px; width: 180px; margin: 0 auto 10px auto; }
-        .res-text { font-size: 0.85rem; margin-bottom: 5px; color: #334155; }
-        .res-text b { color: var(--primary); font-size: 1rem; }
         #status-box { padding: 8px; border-radius: 6px; font-weight: bold; color: white; margin-top: 8px; text-transform: uppercase; font-size: 0.8rem; }
         .btn-pdf { background: #22c55e; margin-top: 12px; font-size: 0.75rem; }
     </style>
@@ -45,7 +41,7 @@
     
     <div class="form-row">
         <div><label>Sexo</label><select id="sexo" onchange="atualizarLabels()"><option value="M">Masc.</option><option value="F">Fem.</option></select></div>
-        <div><label>Idade (Anos)</label><input type="number" id="idade" placeholder="25"></div>
+        <div><label>Idade</label><input type="number" id="idade" placeholder="25"></div>
     </div>
     
     <div class="form-row">
@@ -53,17 +49,17 @@
         <div><label>Peso (kg)</label><input type="number" id="peso" step="0.1" placeholder="80"></div>
     </div>
 
-    <span class="tip">Nota: 1cm no adipômetro = 10mm na calculadora</span>
+    <span class="tip">Nota: 1cm = 10mm no adipômetro</span>
 
     <div class="form-row">
-        <div><label id="lbl1">Peito (mm)</label><input type="number" id="d1" step="0.1" placeholder="0"></div>
-        <div><label id="lbl2">Barriga (mm)</label><input type="number" id="d2" step="0.1" placeholder="0"></div>
+        <div><label id="lbl1">Peito (mm)</label><input type="number" id="d1" step="0.1"></div>
+        <div><label id="lbl2">Barriga (mm)</label><input type="number" id="d2" step="0.1"></div>
     </div>
     
     <div class="form-row">
         <div style="grid-column: span 2;">
             <label id="lbl3">Coxa (mm)</label>
-            <input type="number" id="d3" step="0.1" placeholder="0">
+            <input type="number" id="d3" step="0.1">
         </div>
     </div>
 
@@ -71,8 +67,10 @@
 
     <div id="resultado">
         <div class="chart-box"><canvas id="meuGrafico"></canvas></div>
-        <div class="res-text">Gordura: <b id="res-perc">0%</b> | IMC: <b id="res-imc">0</b></div>
-        <div class="res-text">M. Magra: <b id="res-magra">0kg</b> | M. Gorda: <b id="res-gorda">0kg</b></div>
+        <div style="font-size: 0.9rem; color: #334155;">
+            Gordura: <b id="res-perc" style="color:var(--primary)">0%</b> | IMC: <b id="res-imc" style="color:var(--primary)">0</b><br>
+            Massa Magra: <b id="res-magra">0kg</b> | Massa Gorda: <b id="res-gorda">0kg</b>
+        </div>
         <div id="status-box"></div>
         <button class="btn-pdf" id="btnPdf" onclick="gerarPDF()">Baixar Relatório PDF</button>
     </div>
@@ -81,9 +79,10 @@
 <script>
     let chartInstance = null;
 
-    // Limpa campos ao carregar para evitar lixo de cache
+    // Reseta inputs ao carregar
     window.onload = function() {
         document.querySelectorAll('input').forEach(i => i.value = "");
+        console.log("Sistema pronto.");
     };
 
     function atualizarLabels() {
@@ -101,15 +100,11 @@
         const d2 = parseFloat(document.getElementById('d2').value);
         const d3 = parseFloat(document.getElementById('d3').value);
 
-        if (!idade || !peso || !altura || isNaN(d1) || isNaN(d2) || isNaN(d3)) {
-            alert("Preencha todos os campos!"); return;
+        if (!idade || !peso || !altura || isNaN(d1)) {
+            alert("Por favor, preencha todos os campos!"); return;
         }
 
-        // IMC
-        const alturaMetros = altura / 100;
-        const imcValue = peso / (alturaMetros * alturaMetros);
-
-        // Jackson-Pollock 3 Dobras
+        const imcValue = peso / ((altura/100) * (altura/100));
         const soma = d1 + d2 + d3;
         let densidade = (sexo === 'M') 
             ? 1.10938 - (0.0008267 * soma) + (0.0000016 * soma * soma) - (0.0002574 * idade)
@@ -119,7 +114,6 @@
         const mg = (peso * bf) / 100;
         const mm = peso - mg;
 
-        // Atualiza textos
         document.getElementById('res-perc').innerText = bf.toFixed(1) + "%";
         document.getElementById('res-imc').innerText = imcValue.toFixed(1);
         document.getElementById('res-magra').innerText = mm.toFixed(1) + "kg";
@@ -132,57 +126,48 @@
 
         document.getElementById('resultado').style.display = 'block';
 
-        // Tenta desenhar o gráfico (com delay para garantir que o elemento apareceu)
+        // Gráfico com delay maior para garantir renderização
         setTimeout(() => {
-            desenharGrafico(mm, mg);
-        }, 300);
-    }
+            const ctx = document.getElementById('meuGrafico');
+            if (!ctx) return;
 
-    function desenharGrafico(magra, gorda) {
-        const ctx = document.getElementById('meuGrafico');
-        if (!ctx) return;
+            if (chartInstance) chartInstance.destroy();
 
-        if (chartInstance) chartInstance.destroy();
-
-        // Verifica se a biblioteca Chart.js carregou
-        if (typeof Chart === 'undefined') {
-            console.error("Biblioteca Chart.js não carregou.");
-            return;
-        }
-
-        chartInstance = new Chart(ctx, {
-            type: 'doughnut',
-            data: {
-                labels: ['Massa Magra', 'Massa Gorda'],
-                datasets: [{
-                    data: [magra.toFixed(1), gorda.toFixed(1)],
-                    backgroundColor: ['#0ea5e9', '#e2e8f0'],
-                    borderWidth: 0
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: { legend: { display: false } }
-            }
-        });
+            chartInstance = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Massa Magra', 'Massa Gorda'],
+                    datasets: [{
+                        data: [mm.toFixed(1), mg.toFixed(1)],
+                        backgroundColor: ['#0ea5e9', '#e2e8f0'],
+                        borderWidth: 0
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } }
+                }
+            });
+        }, 350);
     }
 
     function gerarPDF() {
         const btn = document.getElementById('btnPdf');
-        btn.innerText = "Gerando...";
-        
+        btn.innerText = "Processando...";
         const element = document.getElementById('app');
         const opt = {
-            margin: [10, 10],
-            filename: 'Relatorio_BioFit.pdf',
+            margin: 10,
+            filename: 'Avaliacao_BioFit.pdf',
             image: { type: 'jpeg', quality: 0.98 },
-            html2canvas: { scale: 2, useCORS: true, logging: false },
+            html2canvas: { scale: 2, useCORS: true },
             jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
         };
-
         html2pdf().set(opt).from(element).save().then(() => {
             btn.innerText = "Baixar Relatório PDF";
+        }).catch(err => {
+            alert("Erro ao gerar PDF. Verifique sua internet.");
+            btn.innerText = "Tentar novamente";
         });
     }
 </script>
