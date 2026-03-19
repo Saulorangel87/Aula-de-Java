@@ -3,35 +3,36 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BioFit Pro - Oficial</title>
-    <!-- Bibliotecas externas -->
-    <script src="https://cdnjs.cloudflare.com"></script>
+    <title>BioFit Pro - Avaliação Completa</title>
+    
+    <!-- Bibliotecas externas (CDN) -->
     <script src="https://cdn.jsdelivr.net"></script>
+    <script src="https://cdnjs.cloudflare.com"></script>
+
     <style>
         :root { --primary: #0ea5e9; --accent: #06b6d4; --dark: #0f172a; }
         body {
-            font-family: 'Segoe UI', sans-serif; margin: 0; min-height: 100vh;
+            font-family: 'Segoe UI', Roboto, sans-serif; margin: 0; min-height: 100vh;
             display: flex; justify-content: center; align-items: center;
             background: linear-gradient(rgba(15, 23, 42, 0.9), rgba(15, 23, 42, 0.9)), 
                         url('https://images.unsplash.com');
-            background-size: cover; background-position: center;
+            background-size: cover; background-position: center; background-attachment: fixed;
         }
         .container {
-            background: #ffffff; padding: 2rem; border-radius: 20px;
-            box-shadow: 0 20px 40px rgba(0,0,0,0.4); width: 90%; max-width: 400px;
+            background: #ffffff; padding: 1.5rem; border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.4); width: 90%; max-width: 420px;
         }
-        h2 { color: var(--dark); text-align: center; margin-bottom: 1.5rem; font-size: 1.5rem; }
-        .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 1rem; }
-        label { display: block; font-size: 0.7rem; font-weight: bold; color: #475569; margin-bottom: 4px; text-transform: uppercase; }
+        h2 { color: var(--dark); text-align: center; margin-bottom: 1rem; font-size: 1.4rem; text-transform: uppercase; }
+        .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 0.8rem; }
+        label { display: block; font-size: 0.7rem; font-weight: bold; color: #475569; margin-bottom: 3px; text-transform: uppercase; }
         input, select { width: 100%; padding: 10px; border: 2px solid #e2e8f0; border-radius: 8px; box-sizing: border-box; font-size: 1rem; }
         button { width: 100%; background: linear-gradient(135deg, var(--primary), var(--accent)); color: white; padding: 14px; border: none; border-radius: 10px; font-weight: bold; cursor: pointer; text-transform: uppercase; margin-top: 10px; }
         #resultado { margin-top: 1.5rem; display: none; text-align: center; border-top: 2px solid #f1f5f9; padding-top: 1rem; }
-        /* Garante que o canvas tenha um tamanho fixo visível */
-        .chart-box { position: relative; height: 200px; width: 200px; margin: 0 auto 15px auto; }
-        .res-text { font-size: 0.9rem; margin-bottom: 10px; color: #334155; }
-        .res-text b { color: var(--primary); font-size: 1.1rem; }
-        #status-box { padding: 10px; border-radius: 8px; font-weight: bold; color: white; margin-top: 10px; text-transform: uppercase; }
-        .btn-pdf { background: #22c55e; margin-top: 15px; font-size: 0.8rem; }
+        .chart-box { position: relative; height: 180px; width: 180px; margin: 0 auto 10px auto; }
+        .res-text { font-size: 0.85rem; margin-bottom: 5px; color: #334155; }
+        .res-text b { color: var(--primary); font-size: 1rem; }
+        #status-box { padding: 8px; border-radius: 6px; font-weight: bold; color: white; margin-top: 8px; text-transform: uppercase; font-size: 0.8rem; }
+        .btn-pdf { background: #22c55e; margin-top: 12px; font-size: 0.75rem; }
     </style>
 </head>
 <body>
@@ -41,24 +42,31 @@
     
     <div class="form-row">
         <div><label>Sexo</label><select id="sexo" onchange="atualizarLabels()"><option value="M">Masc.</option><option value="F">Fem.</option></select></div>
-        <div><label>Idade</label><input type="number" id="idade" placeholder="25"></div>
+        <div><label>Idade (Anos)</label><input type="number" id="idade" placeholder="25"></div>
     </div>
+    
     <div class="form-row">
+        <div><label>Altura (cm)</label><input type="number" id="altura" placeholder="175"></div>
         <div><label>Peso (kg)</label><input type="number" id="peso" step="0.1" placeholder="80"></div>
-        <div><label id="lbl1">Peito (mm)</label><input type="number" id="d1" step="0.1"></div>
-    </div>
-    <div class="form-row">
-        <div><label id="lbl2">Barriga (mm)</label><input type="number" id="d2" step="0.1"></div>
-        <div><label id="lbl3">Coxa (mm)</label><input type="number" id="d3" step="0.1"></div>
     </div>
 
-    <button onclick="calcular()">Calcular Resultado</button>
+    <div class="form-row">
+        <div><label id="lbl1">Peito (mm)</label><input type="number" id="d1" step="0.1" placeholder="0"></div>
+        <div><label id="lbl2">Barriga (mm)</label><input type="number" id="d2" step="0.1" placeholder="0"></div>
+    </div>
+    
+    <div class="form-row">
+        <div style="grid-column: span 2;">
+            <label id="lbl3">Coxa (mm)</label>
+            <input type="number" id="d3" step="0.1" placeholder="0">
+        </div>
+    </div>
+
+    <button onclick="calcular()">Calcular Composição</button>
 
     <div id="resultado">
-        <div class="chart-box">
-            <canvas id="meuGrafico"></canvas>
-        </div>
-        <div class="res-text">Percentual: <b id="res-perc">0%</b></div>
+        <div class="chart-box"><canvas id="meuGrafico"></canvas></div>
+        <div class="res-text">Gordura: <b id="res-perc">0%</b> | IMC: <b id="res-imc">0</b></div>
         <div class="res-text">M. Magra: <b id="res-magra">0kg</b> | M. Gorda: <b id="res-gorda">0kg</b></div>
         <div id="status-box"></div>
         <button class="btn-pdf" onclick="gerarPDF()">Baixar Relatório PDF</button>
@@ -67,6 +75,11 @@
 
 <script>
     let chartInstance = null;
+
+    // Reseta campos ao atualizar a página (Solução para o cache do navegador)
+    window.onload = function() {
+        document.querySelectorAll('input').forEach(i => i.value = "");
+    };
 
     function atualizarLabels() {
         const s = document.getElementById('sexo').value;
@@ -77,51 +90,52 @@
     function calcular() {
         const sexo = document.getElementById('sexo').value;
         const idade = parseFloat(document.getElementById('idade').value);
+        const altura = parseFloat(document.getElementById('altura').value);
         const peso = parseFloat(document.getElementById('peso').value);
         const d1 = parseFloat(document.getElementById('d1').value);
         const d2 = parseFloat(document.getElementById('d2').value);
         const d3 = parseFloat(document.getElementById('d3').value);
 
-        if (!idade || !peso || isNaN(d1) || isNaN(d2) || isNaN(d3)) {
-            alert("Preencha todos os campos!");
-            return;
+        if (!idade || !peso || !altura || isNaN(d1) || isNaN(d2) || isNaN(d3)) {
+            alert("Por favor, preencha todos os campos!"); return;
         }
 
+        // Cálculo do IMC
+        const alturaMetros = altura / 100;
+        const imc = peso / (alturaMetros * alturaMetros);
+
+        // Cálculo de Gordura (Jackson & Pollock 3 Dobras)
         const soma = d1 + d2 + d3;
-        let d;
-        if (sexo === 'M') {
-            d = 1.10938 - (0.0008267 * soma) + (0.0000016 * soma * soma) - (0.0002574 * idade);
-        } else {
-            d = 1.0994921 - (0.0009929 * soma) + (0.0000023 * soma * soma) - (0.0001392 * idade);
-        }
+        let d = (sexo === 'M') 
+            ? 1.10938 - (0.0008267 * soma) + (0.0000016 * soma * soma) - (0.0002574 * idade)
+            : 1.0994921 - (0.0009929 * soma) + (0.0000023 * soma * soma) - (0.0001392 * idade);
 
         const bf = ((4.95 / d) - 4.50) * 100;
         const mg = (peso * bf) / 100;
         const mm = peso - mg;
 
+        // Atualizar Textos na tela
         document.getElementById('res-perc').innerText = bf.toFixed(1) + "%";
+        document.getElementById('res-imc').innerText = imc.toFixed(1);
         document.getElementById('res-magra').innerText = mm.toFixed(1) + "kg";
         document.getElementById('res-gorda').innerText = mg.toFixed(1) + "kg";
 
-        const statusBox = document.getElementById('status-box');
-        const ideal = sexo === 'M' ? 18 : 25;
-        statusBox.innerText = bf < ideal ? "Bom / Excelente" : "Acima do Ideal";
-        statusBox.style.backgroundColor = bf < ideal ? "#22c55e" : "#ef4444";
+        // Classificação baseada no % de Gordura
+        const box = document.getElementById('status-box');
+        const limite = (sexo === 'M') ? 18 : 25;
+        box.innerText = bf < limite ? "Bom / Excelente" : "Acima do Ideal";
+        box.style.backgroundColor = bf < limite ? "#22c55e" : "#ef4444";
 
         document.getElementById('resultado').style.display = 'block';
 
-        // Renderizar o gráfico com pequeno delay para garantir que o elemento esteja visível
-        setTimeout(() => {
-            renderizarGrafico(mm, mg);
-        }, 100);
+        // Desenhar gráfico com delay de renderização
+        setTimeout(() => renderizarGrafico(mm, mg), 150);
     }
 
     function renderizarGrafico(magra, gorda) {
-        const ctx = document.getElementById('meuGrafico').getContext('2d');
-        
-        if (chartInstance) {
-            chartInstance.destroy();
-        }
+        const canvas = document.getElementById('meuGrafico');
+        const ctx = canvas.getContext('2d');
+        if (chartInstance) chartInstance.destroy();
 
         chartInstance = new Chart(ctx, {
             type: 'doughnut',
@@ -130,7 +144,7 @@
                 datasets: [{
                     data: [magra.toFixed(1), gorda.toFixed(1)],
                     backgroundColor: ['#0ea5e9', '#e2e8f0'],
-                    hoverOffset: 4
+                    borderWidth: 0
                 }]
             },
             options: {
@@ -143,7 +157,13 @@
 
     function gerarPDF() {
         const element = document.getElementById('app');
-        html2pdf().from(element).save('resultado_fitness.pdf');
+        const opt = {
+            margin: 10,
+            filename: 'Avaliacao_BioFit.pdf',
+            html2canvas: { scale: 2, useCORS: true },
+            jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+        };
+        html2pdf().set(opt).from(element).save();
     }
 </script>
 </body>
