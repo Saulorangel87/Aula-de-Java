@@ -3,100 +3,172 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BioFit Pro - Teste de Gráfico</title>
+    <title>BioFit Pro - v3.0</title>
     
-    <!-- Carregamento Prioritário das Bibliotecas -->
-    <script src="https://cdn.jsdelivr.net"></script>
+    <!-- Bibliotecas com links redundantes para garantir carregamento -->
+    <script src="https://cdnjs.cloudflare.com"></script>
     <script src="https://cdnjs.cloudflare.com"></script>
 
     <style>
-        :root { --primary: #0ea5e9; --dark: #0f172a; }
-        body { font-family: sans-serif; background: var(--dark); color: white; display: flex; justify-content: center; padding: 20px; }
-        .container { background: white; color: #333; padding: 20px; border-radius: 15px; width: 100%; max-width: 400px; }
-        input, select { width: 100%; padding: 10px; margin: 5px 0 15px; border: 1px solid #ccc; border-radius: 8px; box-sizing: border-box; }
-        button { width: 100%; padding: 15px; background: var(--primary); color: white; border: none; border-radius: 10px; font-weight: bold; cursor: pointer; }
-        #resultado { margin-top: 20px; display: none; border-top: 2px solid #eee; padding-top: 20px; text-align: center; }
-        /* Box do gráfico com borda para teste visual */
-        .chart-box { width: 200px; height: 200px; margin: 0 auto; position: relative; border: 1px dashed #ddd; }
-        .btn-pdf { background: #22c55e; margin-top: 15px; }
+        :root { --primary: #0ea5e9; --accent: #06b6d4; --dark: #0f172a; }
+        body {
+            font-family: 'Segoe UI', Roboto, sans-serif; margin: 0; min-height: 100vh;
+            display: flex; justify-content: center; align-items: center;
+            background: linear-gradient(rgba(15, 23, 42, 0.9), rgba(15, 23, 42, 0.9)), 
+                        url('https://images.unsplash.com');
+            background-size: cover; background-position: center; background-attachment: fixed;
+        }
+        .container {
+            background: #ffffff; padding: 1.5rem; border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.4); width: 90%; max-width: 420px;
+        }
+        h2 { color: var(--dark); text-align: center; margin-bottom: 1rem; font-size: 1.4rem; text-transform: uppercase; }
+        .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 0.8rem; }
+        label { display: block; font-size: 0.7rem; font-weight: bold; color: #475569; margin-bottom: 3px; text-transform: uppercase; }
+        input, select { width: 100%; padding: 10px; border: 2px solid #e2e8f0; border-radius: 8px; box-sizing: border-box; font-size: 1rem; }
+        .tip { font-size: 0.65rem; color: #64748b; margin-top: -5px; margin-bottom: 10px; display: block; }
+        button { width: 100%; background: linear-gradient(135deg, var(--primary), var(--accent)); color: white; padding: 14px; border: none; border-radius: 10px; font-weight: bold; cursor: pointer; text-transform: uppercase; margin-top: 10px; }
+        #resultado { margin-top: 1.5rem; display: none; text-align: center; border-top: 2px solid #f1f5f9; padding-top: 1rem; }
+        .chart-box { position: relative; height: 180px; width: 180px; margin: 0 auto 10px auto; }
+        #status-box { padding: 8px; border-radius: 6px; font-weight: bold; color: white; margin-top: 8px; text-transform: uppercase; font-size: 0.8rem; }
+        .btn-pdf { background: #22c55e; margin-top: 12px; font-size: 0.75rem; }
     </style>
 </head>
 <body>
 
 <div class="container" id="app">
-    <h2>BioFit Pro</h2>
+    <h2>BIOFIT PRO</h2>
     
-    <label>Peso (kg)</label>
-    <input type="number" id="peso" placeholder="Ex: 80">
+    <div class="form-row">
+        <div><label>Sexo</label><select id="sexo" onchange="atualizarLabels()"><option value="M">Masc.</option><option value="F">Fem.</option></select></div>
+        <div><label>Idade</label><input type="number" id="idade" placeholder="25"></div>
+    </div>
     
-    <label>Altura (cm)</label>
-    <input type="number" id="altura" placeholder="Ex: 175">
+    <div class="form-row">
+        <div><label>Altura (cm)</label><input type="number" id="altura" placeholder="175"></div>
+        <div><label>Peso (kg)</label><input type="number" id="peso" step="0.1" placeholder="80"></div>
+    </div>
 
-    <label>Soma das 3 Dobras (mm)</label>
-    <input type="number" id="soma" placeholder="Ex: 45">
-    <small style="display:block; margin-bottom:15px; color:#666;">(Some os 3 valores do adipômetro e coloque aqui)</small>
+    <span class="tip">Nota: 1cm = 10mm no adipômetro</span>
 
-    <button onclick="calcularRapido()">Calcular Agora</button>
+    <div class="form-row">
+        <div><label id="lbl1">Peito (mm)</label><input type="number" id="d1" step="0.1"></div>
+        <div><label id="lbl2">Barriga (mm)</label><input type="number" id="d2" step="0.1"></div>
+    </div>
+    
+    <div class="form-row">
+        <div style="grid-column: span 2;">
+            <label id="lbl3">Coxa (mm)</label>
+            <input type="number" id="d3" step="0.1">
+        </div>
+    </div>
+
+    <button onclick="calcular()">Calcular Agora</button>
 
     <div id="resultado">
-        <div class="chart-box">
-            <canvas id="meuGrafico"></canvas>
+        <div class="chart-box"><canvas id="meuGrafico"></canvas></div>
+        <div style="font-size: 0.9rem; color: #334155;">
+            Gordura: <b id="res-perc" style="color:var(--primary)">0%</b> | IMC: <b id="res-imc" style="color:var(--primary)">0</b><br>
+            Massa Magra: <b id="res-magra">0kg</b> | Massa Gorda: <b id="res-gorda">0kg</b>
         </div>
-        <p>Gordura: <b id="res-perc">0%</b></p>
-        <button class="btn-pdf" onclick="gerarPDF()">Baixar PDF</button>
+        <div id="status-box"></div>
+        <button class="btn-pdf" id="btnPdf" onclick="gerarPDF()">Baixar Relatório PDF</button>
     </div>
 </div>
 
 <script>
     let chartInstance = null;
 
-    function calcularRapido() {
-        const peso = parseFloat(document.getElementById('peso').value);
-        const soma = parseFloat(document.getElementById('soma').value);
-        const altura = parseFloat(document.getElementById('altura').value);
+    // Reseta inputs ao carregar
+    window.onload = function() {
+        document.querySelectorAll('input').forEach(i => i.value = "");
+        console.log("Sistema pronto.");
+    };
 
-        if (!peso || !soma || !altura) {
-            alert("Preencha os campos de teste!");
-            return;
+    function atualizarLabels() {
+        const s = document.getElementById('sexo').value;
+        document.getElementById('lbl1').innerText = s === 'M' ? "Peito (mm)" : "Braço (atrás)";
+        document.getElementById('lbl2').innerText = s === 'M' ? "Barriga (mm)" : "Cintura (lat)";
+    }
+
+    function calcular() {
+        const sexo = document.getElementById('sexo').value;
+        const idade = parseFloat(document.getElementById('idade').value);
+        const altura = parseFloat(document.getElementById('altura').value);
+        const peso = parseFloat(document.getElementById('peso').value);
+        const d1 = parseFloat(document.getElementById('d1').value);
+        const d2 = parseFloat(document.getElementById('d2').value);
+        const d3 = parseFloat(document.getElementById('d3').value);
+
+        if (!idade || !peso || !altura || isNaN(d1)) {
+            alert("Por favor, preencha todos os campos!"); return;
         }
 
-        // Cálculo simplificado para teste de renderização
-        const bf = (soma * 0.25).toFixed(1); 
-        const mg = (peso * bf / 100).toFixed(1);
-        const mm = (peso - mg).toFixed(1);
+        const imcValue = peso / ((altura/100) * (altura/100));
+        const soma = d1 + d2 + d3;
+        let densidade = (sexo === 'M') 
+            ? 1.10938 - (0.0008267 * soma) + (0.0000016 * soma * soma) - (0.0002574 * idade)
+            : 1.0994921 - (0.0009929 * soma) + (0.0000023 * soma * soma) - (0.0001392 * idade);
 
-        document.getElementById('res-perc').innerText = bf + "%";
+        const bf = ((4.95 / densidade) - 4.50) * 100;
+        const mg = (peso * bf) / 100;
+        const mm = peso - mg;
+
+        document.getElementById('res-perc').innerText = bf.toFixed(1) + "%";
+        document.getElementById('res-imc').innerText = imcValue.toFixed(1);
+        document.getElementById('res-magra').innerText = mm.toFixed(1) + "kg";
+        document.getElementById('res-gorda').innerText = mg.toFixed(1) + "kg";
+
+        const box = document.getElementById('status-box');
+        const limite = (sexo === 'M') ? 18 : 25;
+        box.innerText = bf < limite ? "Bom / Excelente" : "Acima do Ideal";
+        box.style.backgroundColor = bf < limite ? "#22c55e" : "#ef4444";
+
         document.getElementById('resultado').style.display = 'block';
 
-        // Tenta desenhar o gráfico
+        // Gráfico com delay maior para garantir renderização
         setTimeout(() => {
-            const ctx = document.getElementById('meuGrafico').getContext('2d');
-            
+            const ctx = document.getElementById('meuGrafico');
+            if (!ctx) return;
+
             if (chartInstance) chartInstance.destroy();
 
-            try {
-                chartInstance = new Chart(ctx, {
-                    type: 'doughnut',
-                    data: {
-                        labels: ['Magra', 'Gorda'],
-                        datasets: [{
-                            data: [mm, mg],
-                            backgroundColor: ['#0ea5e9', '#e2e8f0']
-                        }]
-                    },
-                    options: { responsive: true, maintainAspectRatio: false }
-                });
-                console.log("Gráfico criado com sucesso!");
-            } catch (e) {
-                console.error("Erro ao carregar Chart.js:", e);
-                alert("Erro técnico: O motor do gráfico não carregou. Verifique sua internet.");
-            }
-        }, 200);
+            chartInstance = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Massa Magra', 'Massa Gorda'],
+                    datasets: [{
+                        data: [mm.toFixed(1), mg.toFixed(1)],
+                        backgroundColor: ['#0ea5e9', '#e2e8f0'],
+                        borderWidth: 0
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } }
+                }
+            });
+        }, 350);
     }
 
     function gerarPDF() {
+        const btn = document.getElementById('btnPdf');
+        btn.innerText = "Processando...";
         const element = document.getElementById('app');
-        html2pdf().from(element).save('Teste_BioFit.pdf');
+        const opt = {
+            margin: 10,
+            filename: 'Avaliacao_BioFit.pdf',
+            image: { type: 'jpeg', quality: 0.98 },
+            html2canvas: { scale: 2, useCORS: true },
+            jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+        };
+        html2pdf().set(opt).from(element).save().then(() => {
+            btn.innerText = "Baixar Relatório PDF";
+        }).catch(err => {
+            alert("Erro ao gerar PDF. Verifique sua internet.");
+            btn.innerText = "Tentar novamente";
+        });
     }
 </script>
 </body>
