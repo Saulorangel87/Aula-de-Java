@@ -1,0 +1,35 @@
+body {
+    background: rgb(152, 186, 111);
+    font: normal 15pt Arial, Helvetica, sans-serif;
+    font-style: italic;
+}
+
+
+header {
+    color: rgb(252, 252, 252);
+    background-color: rgb(41, 22, 2);
+    text-align: center;
+    font-size: 20pt;
+
+}
+    
+
+section {
+
+    background-color: rgb(230, 219, 206);
+    border-radius: 10px;
+    border: 2px solid rgb(216, 225, 51); /* ADICIONE ESTA LINHA */
+    padding: 10px;
+    width: 500px;
+    margin: auto;
+    box-shadow: 5px 5px 10px rgba(0, 0, 0, 0.693);
+}
+
+
+
+
+footer {
+    color: white;
+    text-align: center;
+    font-style: italic;
+}
